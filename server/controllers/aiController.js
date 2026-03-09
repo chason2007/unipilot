@@ -66,3 +66,62 @@ exports.parseVoiceToTask = async (req, res) => {
         res.status(500).json({ error: 'Failed to process AI task' });
     }
 };
+
+const pdfParse = require('pdf-parse');
+
+exports.parseSyllabus = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No syllabus file uploaded' });
+        }
+
+        console.log(`[AI Engine] Parsing Syllabus PDF: ${req.file.originalname} (${req.file.size} bytes)`);
+
+        // 1. Extract raw text from PDF
+        const pdfData = await pdfParse(req.file.buffer);
+        const rawText = pdfData.text;
+
+        console.log(`[AI Engine] Extracted ${rawText.length} characters from PDF.`);
+
+        // 2. Simulate AI Chunking & Parsing
+        // Normally we'd send `rawText` to GPT-4o with instructions to extract a chronological list of assignments.
+
+        // We will simulate the LLM finding 3 "Tentative" tasks from the syllabus
+        const mockExtractedTasks = [
+            {
+                id: 'tentative-' + Date.now() + 1,
+                title: 'Midterm Exam - Extracted from Syllabus',
+                currentDueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks out
+                category: 'Exam',
+                isTentative: true,
+                confidenceScore: 92
+            },
+            {
+                id: 'tentative-' + Date.now() + 2,
+                title: 'Final Term Paper - Extracted from Syllabus',
+                currentDueDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days out
+                category: 'Project',
+                isTentative: true,
+                confidenceScore: 85
+            },
+            {
+                id: 'tentative-' + Date.now() + 3,
+                title: 'Weekly Reading Quiz 1 - Extracted from Syllabus',
+                currentDueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Next week
+                category: 'Quiz',
+                isTentative: true,
+                confidenceScore: 98
+            }
+        ];
+
+        return res.status(200).json({
+            success: true,
+            message: 'Syllabus parsed successfully',
+            tentativeTasks: mockExtractedTasks
+        });
+
+    } catch (error) {
+        console.error("Syllabus Parsing Error", error);
+        res.status(500).json({ error: 'Failed to parse syllabus' });
+    }
+};

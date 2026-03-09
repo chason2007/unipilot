@@ -3,6 +3,7 @@ import { Calendar as CalendarIcon, Clock, Tag, LayoutDashboard, LayoutList } fro
 import stringSimilarity from 'string-similarity';
 import TaskInput from '../components/TaskInput';
 import TaskCalendar from '../components/TaskCalendar';
+import SyllabusUpload from '../components/SyllabusUpload';
 
 const mockTasks = [
     { id: 1, title: 'Read Chapter 4 of Intro to Psychology', dueDate: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), category: 'Reading', priority: 'High', course: 'PSY101' },
@@ -145,14 +146,7 @@ const Dashboard = () => {
 
                     {/* Right Sidebar */}
                     <div className="space-y-6 lg:col-span-1">
-                        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-md p-6 text-white relative overflow-hidden">
-                            <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                            <h3 className="font-bold text-lg mb-2 relative z-10">Syllabus Sync</h3>
-                            <p className="text-indigo-100 text-sm mb-4 relative z-10">Upload a PDF syllabus and let Ai extract all your deadlines automatically.</p>
-                            <button className="w-full bg-white text-indigo-700 font-semibold py-2 rounded-xl shadow-sm hover:bg-slate-50 transition-colors relative z-10 focus:ring-2 focus:ring-white/50 focus:outline-none">
-                                Upload PDF
-                            </button>
-                        </div>
+                        <SyllabusUpload onTasksExtracted={(task) => handleTaskAction('CREATE', task)} />
 
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
