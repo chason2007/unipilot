@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Mic, Send, Loader2 } from 'lucide-react';
 
-const TaskInput = ({ onTaskCreated }) => {
+const TaskInput = ({ onTaskAction }) => {
     const [inputText, setInputText] = useState('');
     const [isListening, setIsListening] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -50,15 +50,17 @@ const TaskInput = ({ onTaskCreated }) => {
 
         setIsLoading(true);
         try {
-            // Stubbing the API call to aiController
             const response = await fetch('http://localhost:5000/api/ai/parse-voice', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: inputText, userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone })
             });
 
-            const data = await response.json();
-            onTaskCreated(data.task);
+            const responseData = await response.json();
+
+            // Pass the action and structured data back to Dashboard
+            onTaskAction(responseData.action, responseData.data);
+
             setInputText('');
         } catch (error) {
             console.error("Failed to parse task", error);
@@ -85,7 +87,7 @@ const TaskInput = ({ onTaskCreated }) => {
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Hold the mic to speak, or type a task... (e.g. 'CS101 quiz tomorrow')"
+                    placeholder="Try: 'Move the Psych reading to Friday' or 'Add Math Quiz on Monday'"
                     className="flex-1 bg-transparent border-none outline-none text-slate-700 placeholder:text-slate-400 font-medium"
                 />
                 <button

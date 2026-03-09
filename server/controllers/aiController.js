@@ -1,7 +1,5 @@
 const Task = require('../models/Task');
 
-// In a real application, we would use the OpenAI or Google Gemini SDK.
-// For the MVP, we will mock the LLM response to ensure the architecture works.
 exports.parseVoiceToTask = async (req, res) => {
     try {
         const { text, userTimezone } = req.body;
@@ -12,35 +10,37 @@ exports.parseVoiceToTask = async (req, res) => {
 
         console.log(`[AI Engine] Parsing request: "${text}" with TZ: ${userTimezone}`);
 
-        // ----- LLM STUB: Simulate OpenAI / Gemini API Call -----
-        // const systemPrompt = `You are a scheduling assistant...`;
-        // const response = await openai.chat.completions.create({...});
+        const lowerText = text.toLowerCase();
 
-        // Simulating parsing logic: 
-        // E.g., if user says "CS101 quiz tomorrow", we mock the output JSON
-        const mockExtractedTask = {
-            title: "Generated from: " + text.substring(0, 20) + "...",
-            currentDueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-            category: text.toLowerCase().includes('quiz') ? 'Quiz' : (text.toLowerCase().includes('project') ? 'Project' : 'Assignment')
-        };
-        // -------------------------------------------------------------
+        // Simulate AI Intent Detection
+        let intent = 'CREATE';
+        if (lowerText.includes('change') || lowerText.includes('move') || lowerText.includes('update') || lowerText.includes('delay')) {
+            intent = 'UPDATE';
+        } else if (lowerText.includes('delete') || lowerText.includes('remove') || lowerText.includes('cancel')) {
+            intent = 'DELETE';
+        }
 
-        // Note: We would normally save this to the real DB, but since auth isn't wired up in the frontend yet (so no req.user.id), 
-        // we return the parsed task directly to the frontend so it can be viewed on the Dashboard optimistically.
+        // Simulate Parsing logic
+        let mockExtractedData = {};
 
-        /* 
-          const newTask = new Task({
-            userId: req.user.id,
-            title: mockExtractedTask.title,
-            currentDueDate: mockExtractedTask.currentDueDate,
-            category: mockExtractedTask.category
-          });
-          await newTask.save();
-        */
+        if (intent === 'CREATE') {
+            mockExtractedData = {
+                title: "Generated from: " + text.substring(0, 20) + "...",
+                currentDueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                category: lowerText.includes('quiz') ? 'Quiz' : (lowerText.includes('project') ? 'Project' : 'Assignment')
+            };
+        } else if (intent === 'UPDATE') {
+            // Mocking target entity extraction ("the quiz", "history paper")
+            mockExtractedData = {
+                targetEntity: lowerText.replace(/(change|move|update|delay|to)/gi, '').trim(),
+                newDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // Move out 3 days
+            };
+        }
 
         return res.status(200).json({
             success: true,
-            task: mockExtractedTask
+            action: intent,
+            data: mockExtractedData
         });
 
     } catch (error) {
